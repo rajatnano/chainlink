@@ -81,9 +81,9 @@ type (
 		registrations *registrations
 		logPool       *logPool
 
-		addSubscriber *utils.Mailbox
-		rmSubscriber  *utils.Mailbox
-		newHeads      *utils.Mailbox
+		addSubscriber *utils.Mailbox[registration]
+		rmSubscriber  *utils.Mailbox[registration]
+		newHeads      *utils.Mailbox[*evmtypes.Head]
 
 		utils.StartStopOnce
 		utils.DependentAwaiter
@@ -145,9 +145,9 @@ func NewBroadcaster(orm ORM, ethClient evmclient.Client, config Config, lggr log
 		ethSubscriber:    newEthSubscriber(ethClient, config, lggr, chStop),
 		registrations:    newRegistrations(lggr, *ethClient.ChainID()),
 		logPool:          newLogPool(),
-		addSubscriber:    utils.NewMailbox(0),
-		rmSubscriber:     utils.NewMailbox(0),
-		newHeads:         utils.NewMailbox(1),
+		addSubscriber:    utils.NewMailbox[registration](0),
+		rmSubscriber:     utils.NewMailbox[registration](0),
+		newHeads:         utils.NewMailbox[*evmtypes.Head](1),
 		DependentAwaiter: utils.NewDependentAwaiter(),
 		chStop:           chStop,
 		highestSavedHead: highestSavedHead,
@@ -424,11 +424,10 @@ func (b *broadcaster) onNewHeads() {
 	var latestHead *evmtypes.Head
 	for {
 		// We only care about the most recent head
-		item := b.newHeads.RetrieveLatestAndClear()
-		if item == nil {
+		head := b.newHeads.RetrieveLatestAndClear()
+		if head == nil {
 			break
 		}
-		head := evmtypes.AsHead(item)
 		latestHead = head
 	}
 
@@ -492,14 +491,9 @@ func (b *broadcaster) onNewHeads() {
 
 func (b *broadcaster) onAddSubscribers() (needsResubscribe bool) {
 	for {
-		x, exists := b.addSubscriber.Retrieve()
+		reg, exists := b.addSubscriber.Retrieve()
 		if !exists {
 			break
-		}
-		reg, ok := x.(registration)
-		if !ok {
-			b.logger.Errorf("expected `registration`, got %T", x)
-			continue
 		}
 		b.logger.Debugw("Subscribing listener", "requiredBlockConfirmations", reg.opts.MinIncomingConfirmations, "address", reg.opts.Contract)
 		needsResub := b.registrations.addSubscriber(reg)
@@ -512,14 +506,9 @@ func (b *broadcaster) onAddSubscribers() (needsResubscribe bool) {
 
 func (b *broadcaster) onRmSubscribers() (needsResubscribe bool) {
 	for {
-		x, exists := b.rmSubscriber.Retrieve()
+		reg, exists := b.rmSubscriber.Retrieve()
 		if !exists {
 			break
-		}
-		reg, ok := x.(registration)
-		if !ok {
-			b.logger.Errorf("expected `registration`, got %T", x)
-			continue
 		}
 		b.logger.Debugw("Unsubscribing listener", "requiredBlockConfirmations", reg.opts.MinIncomingConfirmations, "address", reg.opts.Contract)
 		needsResub := b.registrations.removeSubscriber(reg)

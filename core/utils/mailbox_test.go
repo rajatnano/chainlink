@@ -8,7 +8,7 @@ import (
 )
 
 func TestMailbox(t *testing.T) {
-	m := utils.NewMailbox(10)
+	m := utils.NewMailbox[int](10)
 
 	var (
 		expected  = []int{2, 3, 4, 5, 6, 7, 8, 9, 10, 11}
@@ -25,7 +25,7 @@ func TestMailbox(t *testing.T) {
 				if !exists {
 					break
 				}
-				recvd = append(recvd, x.(int))
+				recvd = append(recvd, x)
 			}
 		}
 	}()
@@ -46,7 +46,7 @@ func TestMailbox(t *testing.T) {
 }
 
 func TestMailbox_NoEmptyReceivesWhenCapacityIsTwo(t *testing.T) {
-	m := utils.NewMailbox(2)
+	m := utils.NewMailbox[int](2)
 
 	var (
 		recvd         []int
@@ -61,7 +61,7 @@ func TestMailbox_NoEmptyReceivesWhenCapacityIsTwo(t *testing.T) {
 			if !exists {
 				emptyReceives = append(emptyReceives, recvd[len(recvd)-1])
 			} else {
-				recvd = append(recvd, x.(int))
+				recvd = append(recvd, x)
 			}
 		}
 	}()

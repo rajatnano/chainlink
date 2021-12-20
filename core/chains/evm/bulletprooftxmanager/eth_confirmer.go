@@ -97,7 +97,7 @@ type EthConfirmer struct {
 
 	keyStates []ethkey.State
 
-	mb        *utils.Mailbox
+	mb        *utils.Mailbox[*evmtypes.Head]
 	ctx       context.Context
 	ctxCancel context.CancelFunc
 	wg        sync.WaitGroup
@@ -127,7 +127,7 @@ func NewEthConfirmer(db *sqlx.DB, ethClient evmclient.Client, config Config, key
 		estimator,
 		resumeCallback,
 		keyStates,
-		utils.NewMailbox(1),
+		utils.NewMailbox[*evmtypes.Head](1),
 		context,
 		cancel,
 		sync.WaitGroup{},
@@ -174,8 +174,7 @@ func (ec *EthConfirmer) runLoop() {
 				if !exists {
 					break
 				}
-				h := evmtypes.AsHead(head)
-				if err := ec.ProcessHead(ec.ctx, h); err != nil {
+				if err := ec.ProcessHead(ec.ctx, head); err != nil {
 					ec.lggr.Errorw("Error processing head", "err", err)
 					continue
 				}
@@ -1116,7 +1115,7 @@ func (ec *EthConfirmer) handleInProgressAttempt(ctx context.Context, etx EthTx, 
 	}
 
 	if sendError.IsInsufficientEth() {
-		ec.lggr.Errorw(fmt.Sprintf("EthTxAttempt %v (hash 0x%x) at gas price (%s Wei) was rejected due to insufficient eth. "+
+		ec.lggr.Errorw(fmt.Sprintf("EthTxAttempt %v (hash 0x%x) at gas price (%s Wei) was rejected due to insufficient evmtypes. "+
 			"The eth node returned %s. "+
 			"ACTION REQUIRED: Chainlink wallet with address 0x%x is OUT OF FUNDS",
 			attempt.ID, attempt.Hash, attempt.GasPrice.String(), sendError.Error(), etx.FromAddress,

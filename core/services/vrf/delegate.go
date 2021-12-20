@@ -11,6 +11,7 @@ import (
 	"github.com/theodesp/go-heaps/pairing"
 
 	"github.com/smartcontractkit/chainlink/core/chains/evm"
+	"github.com/smartcontractkit/chainlink/core/chains/evm/log"
 	"github.com/smartcontractkit/chainlink/core/internal/gethwrappers/generated/solidity_vrf_coordinator_interface"
 	"github.com/smartcontractkit/chainlink/core/internal/gethwrappers/generated/vrf_coordinator_v2"
 	"github.com/smartcontractkit/chainlink/core/logger"
@@ -110,7 +111,7 @@ func (d *Delegate) ServicesForSpec(jb job.Job) ([]job.Service, error) {
 				pipelineRunner:     d.pr,
 				gethks:             d.ks.Eth(),
 				job:                jb,
-				reqLogs:            utils.NewHighCapacityMailbox(),
+				reqLogs:            utils.NewHighCapacityMailbox[log.Broadcast](),
 				chStop:             make(chan struct{}),
 				respCount:          GetStartingResponseCountsV2(d.q, lV2, chain.Client().ChainID().Uint64(), chain.Config().EvmFinalityDepth()),
 				blockNumberToReqID: pairing.New(),
@@ -133,7 +134,7 @@ func (d *Delegate) ServicesForSpec(jb job.Job) ([]job.Service, error) {
 				job:             jb,
 				// Note the mailbox size effectively sets a limit on how many logs we can replay
 				// in the event of a VRF outage.
-				reqLogs:            utils.NewHighCapacityMailbox(),
+				reqLogs:            utils.NewHighCapacityMailbox[log.Broadcast](),
 				chStop:             make(chan struct{}),
 				waitOnStop:         make(chan struct{}),
 				newHead:            make(chan struct{}, 1),

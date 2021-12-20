@@ -70,7 +70,7 @@ type (
 		chainID             big.Int
 		config              Config
 		rollingBlockHistory []Block
-		mb                  *utils.Mailbox
+		mb                  *utils.Mailbox[*evmtypes.Head]
 		wg                  *sync.WaitGroup
 		ctx                 context.Context
 		ctxCancel           context.CancelFunc
@@ -94,7 +94,7 @@ func NewBlockHistoryEstimator(lggr logger.Logger, ethClient evmclient.Client, co
 		chainID,
 		config,
 		make([]Block, 0),
-		utils.NewMailbox(1),
+		utils.NewMailbox[*evmtypes.Head](1),
 		new(sync.WaitGroup),
 		ctx,
 		cancel,
@@ -208,8 +208,7 @@ func (b *BlockHistoryEstimator) runLoop() {
 				b.logger.Info("No head to retrieve. It might have been skipped")
 				continue
 			}
-			h := evmtypes.AsHead(head)
-			b.FetchBlocksAndRecalculate(b.ctx, h)
+			b.FetchBlocksAndRecalculate(b.ctx, head)
 		}
 	}
 }

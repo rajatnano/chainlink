@@ -1115,7 +1115,7 @@ func (ec *EthConfirmer) handleInProgressAttempt(ctx context.Context, etx EthTx, 
 	}
 
 	if sendError.IsInsufficientEth() {
-		ec.lggr.Errorw(fmt.Sprintf("EthTxAttempt %v (hash 0x%x) at gas price (%s Wei) was rejected due to insufficient evmtypes. "+
+		ec.lggr.Errorw(fmt.Sprintf("EthTxAttempt %v (hash 0x%x) at gas price (%s Wei) was rejected due to insufficient eth. "+
 			"The eth node returned %s. "+
 			"ACTION REQUIRED: Chainlink wallet with address 0x%x is OUT OF FUNDS",
 			attempt.ID, attempt.Hash, attempt.GasPrice.String(), sendError.Error(), etx.FromAddress,

@@ -98,7 +98,6 @@ jobs:
 
   solana:
     name: Solana Tests
-    needs: build-chainlink
     uses: smartcontractkit/chainlink-solana/.github/workflows/e2e.yml@develop
     secrets:
       aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}

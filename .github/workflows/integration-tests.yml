@@ -99,6 +99,8 @@ jobs:
   solana:
     name: Solana Tests
     uses: smartcontractkit/chainlink-solana/.github/workflows/e2e.yml@reuseWorkflow
+    with:
+      repo_name: smartcontractkit/chainlink-solana
     secrets:
       QA_AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
       QA_AWS_SECRET_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}

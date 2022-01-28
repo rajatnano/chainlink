@@ -9,11 +9,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Added support for batch sending telemetry to the ingress server to improve performance.
+
 New ENV vars:
 
 - `ADVISORY_LOCK_CHECK_INTERVAL` (default: 1s) - when advisory locking mode is enabled, this controls how often Chainlink checks to make sure it still holds the advisory lock. It is recommended to leave this at the default.
 - `ADVISORY_LOCK_ID` (default: 1027321974924625846) - when advisory locking mode is enabled, the application advisory lock ID can be changed using this env var. All instances of Chainlink that might run on a particular database must share the same advisory lock ID. It is recommended to leave this at the default.
 - `LOG_FILE_DIR` (default: chainlink root directory) - if `LOG_TO_DISK` is enabled, this env var allows you to override the output directory for logging.
+- `TELEMETRY_INGRESS_BUFFER_SIZE` (default: 100) - the number of telemetry messages to buffer before dropping new ones
+- `TELEMETRY_INGRESS_MAX_BATCH_SIZE` (default: 50) - the maximum number of messages to batch into one telemetry request
+- `TELEMETRY_INGRESS_SEND_INTERNAL` (default: 500ms) - the cadence on which batched telemetry is sent to the ingress server
+- `TELEMETRY_INGRESS_USE_BATCH_SEND` (default: true) - toggles sending telemetry using the batch client to the ingress server
 
 ## [1.1.0] - 2022-01-25
 

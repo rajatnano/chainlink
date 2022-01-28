@@ -30,7 +30,7 @@ jobs:
           push: true
 
   smoke:
-    name: Smoke Tests
+    name: ETH Smoke Tests
     runs-on: ubuntu-latest
     needs: build-chainlink
     env:
@@ -98,7 +98,7 @@ jobs:
 
   solana:
     name: Solana Tests
-    uses: smartcontractkit/chainlink-solana/.github/workflows/e2e.yml@reuseWorkflow
+    uses: smartcontractkit/chainlink-solana/.github/workflows/e2e.yml@develop
     with:
       repo_name: smartcontractkit/chainlink-solana
     secrets:
